@@ -11,12 +11,18 @@ services:
     volumes:
       - /home/node/app/node_modules
       - .:/home/node/app
+      - sqlite-data:/home/node/app/data/sqlite
     ports:
       - "3000:3000"
+      - "3001:5555"
     command:
       - /bin/sh
       - -c
       - |
         cd /home/node/app/
-        pm2 start ecosystem.config.js --only "webservice-dev"
+        npx prisma generate
+        npx prisma db push
+        pm2 start ecosystem.config.js --only "webservice-dev,prisma_studio"
         pm2 log
+volumes:
+  sqlite-data:
