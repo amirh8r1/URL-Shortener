@@ -21,7 +21,7 @@ services:
       - |
         cd /home/node/app/
         npx prisma generate
-        npx prisma db push
+        npx prisma db push --accept-data-loss
         pm2 start ecosystem.config.js --only "webservice-dev,prisma_studio"
         pm2 log
 volumes:
