@@ -1,0 +1,22 @@
+services:
+  url-shortener-api:
+    container_name: url-shortener-api
+    hostname: url-shortener-api
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      target: development
+      no_cache: true
+    restart: unless-stopped
+    volumes:
+      - /home/node/app/node_modules
+      - .:/home/node/app
+    ports:
+      - "3000:3000"
+    command:
+      - /bin/sh
+      - -c
+      - |
+        cd /home/node/app/
+        pm2 start ecosystem.config.js --only "webservice-dev"
+        pm2 log

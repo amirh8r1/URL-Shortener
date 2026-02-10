@@ -1,0 +1,31 @@
+{
+  "name": "url-shortener",
+  "version": "1.0.0",
+  "description": "A scalable URL shortening backend service supporting up to 10 million URLs with deterministic Base62 short codes.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "pm2 start ./ecosystem.config.js --only webservice-dev",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amirh8r1/URL-Shortener.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "debug": "^4.4.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "helmet": "^8.0.0",
+    "morgan": "^1.10.0",
+    "winston": "^3.17.0",
+    "winston-daily-rotate-file": "^5.0.0"
+  },
+  "bugs": {
+    "url": "https://github.com/amirh8r1/URL-Shortener/issues"
+  },
+  "homepage": "https://github.com/amirh8r1/URL-Shortener#readme"
+}
