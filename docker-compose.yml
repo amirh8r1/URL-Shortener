@@ -1,0 +1,28 @@
+services:
+  url-shortener-api:
+    container_name: url-shortener-api
+    hostname: url-shortener-api
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      target: development
+      no_cache: true
+    restart: unless-stopped
+    volumes:
+      - /home/node/app/node_modules
+      - .:/home/node/app
+      - sqlite-data:/home/node/app/data/sqlite
+    ports:
+      - "3000:3000"
+      - "3001:5555"
+    command:
+      - /bin/sh
+      - -c
+      - |
+        cd /home/node/app/
+        npx prisma generate
+        npx prisma db push --accept-data-loss
+        pm2 start ecosystem.config.js --only "webservice-dev,prisma_studio"
+        pm2 log
+volumes:
+  sqlite-data:

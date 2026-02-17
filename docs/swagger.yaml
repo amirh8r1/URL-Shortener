@@ -1,0 +1,190 @@
+openapi: 3.0.3
+info:
+  title: URL Shortener API
+  description: >
+    A simple and scalable URL Shortener service with random 4-character codes,
+    expiration handling, overwrite-on-expire logic, and pagination.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Local development
+
+tags:
+  - name: Short URLs
+    description: URL shortening operations
+
+paths:
+  /api/v1/urls:
+    post:
+      tags: [Short URLs]
+      summary: Create a short URL
+      description: >
+        Generates a random 4-character short code.
+        If the generated code already exists and is expired, it will be overwritten.
+        If it exists and is still valid, a new code will be generated.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateShortUrlRequest"
+            examples:
+              example:
+                value:
+                  url: https://google.com
+                  ttlMinutes: 60
+      responses:
+        "201":
+          description: Short URL created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShortUrl"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+    get:
+      tags: [Short URLs]
+      summary: List all short URLs
+      description: Get all stored short URLs with pagination.
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Paginated list of short URLs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedShortUrls"
+
+  /api/v1/urls/{code}:
+    get:
+      tags: [Short URLs]
+      summary: Redirect to original URL
+      description: Redirects to the original URL if the short code exists and is not expired.
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-zA-Z0-9]{4}$"
+          example: aB9z
+      responses:
+        "302":
+          description: Redirect to original URL
+        "404":
+          description: Short URL not found or expired
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    CreateShortUrlRequest:
+      type: object
+      required: [url]
+      properties:
+        url:
+          type: string
+          format: uri
+          example: https://example.com
+        ttlMinutes:
+          type: integer
+          minimum: 1
+          maximum: 43200
+          example: 60
+
+    ShortUrl:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        code:
+          type: string
+          example: aB9z
+        originalUrl:
+          type: string
+          example: https://example.com
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PaginatedShortUrls:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ShortUrl"
+        meta:
+          type: object
+          properties:
+            page:
+              type: integer
+              example: 1
+            limit:
+              type: integer
+              example: 20
+            total:
+              type: integer
+              example: 100
+            pages:
+              type: integer
+              example: 5
+
+    ValidationError:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 422
+        message:
+          type: string
+          example: Validation error
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              path:
+                type: array
+                items:
+                  type: string
+              message:
+                type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 404
+        message:
+          type: string
+          example: Not found

@@ -1,0 +1,32 @@
+#!/usr/bin/env node
+
+require("dotenv").config();
+require("../server/ServerConfig")();
+
+const http = require("http");
+
+const ServerLogger = require("../server/ServerLogger");
+const ServerHelper = require("../server/ServerHelper");
+const ServerBootstrap = require("../server/ServerBootstrap");
+
+class ServerRunner {
+  static run() {
+    try {
+      const app = ServerBootstrap.boot();
+      const port = ServerHelper.normalizePort(process.env.PORT);
+
+      ServerHelper.setup(app, port);
+
+      const server = http.createServer(app);
+
+      server.listen(port, () => {
+        ServerLogger.info(process.env.URL);
+        ServerLogger.info(`Server running on port ${port}`);
+      });
+    } catch (error) {
+      ServerLogger.error(error);
+    }
+  }
+}
+
+ServerRunner.run();
